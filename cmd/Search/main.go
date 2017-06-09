@@ -10,12 +10,6 @@ import (
 	"sort"
 )
 
-// structures for grade search
-type kv struct {
-	key   string
-	value int
-}
-
 var dataFile string = "index.db"
 
 func main() {
@@ -35,75 +29,62 @@ func main() {
 		log.Println("Index loaded")
 	}
 
-	if len(os.Args) < 3 {
-		usage()
-		log.Fatal("wrong usage")
+	if len(os.Args) < 2 {
+		log.Fatal("Usage: Search [ word1 word2 ... | -all word1 word2 ...| -phrase \"phrase to search\"]")
 	}
 
 	switch os.Args[1] {
-	case "-any":
-		searchAny(os.Args[2:], data)
 	case "-all":
 		searchAll(os.Args[2:], data)
 	case "-phrase":
 		searchPhrase("", data)
 	default:
-		usage()
+		searchAny(os.Args[1:], data)
 	}
-
-}
-
-func usage() {
-	log.Println("Usage: [-any | -all | -phrase]")
-	log.Println("\tUsage: -any   word1 word2 etc....")
-	log.Println("\tUsage: -all word1 [meanean and] word2d2 etc...")
-	log.Println("\tUsage: -phrase phrase to searchch from indexFileNameed files")
-	return
 }
 
 func searchAny(words []string, data index.Data) {
 	log.Println("Search (any words) starting:")
+	type pc struct {
+		Path  string
+		Count int
+	}
+	words = removeDup(words)
 	for i, word := range words {
-		result := []kv{}
+		var result []pc
 		log.Printf("\t%v. Searching for '%v'\n", i, word)
 		if _, ok := data[word]; !ok {
 			log.Println("\t\tcan not find this word")
 		} else {
 			log.Println("\tFound in:")
 			for path, count := range data[word] {
-				result = append(result, kv{path, count})
+				result = append(result, pc{Path: path, Count: count})
 			}
 		}
 		// will work from v 1.8
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].value > result[j].value
+			return result[i].Count > result[j].Count
 		})
-		for _, kv := range result {
-			log.Printf("\t\t%s [%d]\n", kv.key, kv.value)
+		for _, r := range result {
+			log.Printf("\t\t%s [%d]\n", r.Path, r.Count)
 		}
 	}
 }
 
 func searchAll(words []string, data index.Data) {
 	log.Println("Search (all words) starting:")
-	wordsMap := make(map[string]int)
+	words = removeDup(words)
+	f2p := make(map[string]int)
 	for _, w := range words {
-		wordsMap[w]++
-		if wordsMap[w] > 1 {
-			log.Printf("duplicate search words found(will be skipped): [%v]\n", w)
-		}
-	}
-	filesMap := make(map[string]int)
-	for w, _ := range wordsMap {
-		if _, ok := data[w]; ok == true {
+		if _, ok := data[w]; ok {
 			for path, _ := range data[w] {
-				filesMap[path]++
+				f2p[path]++
 			}
 		}
 	}
 	count := 0
-	for path, _ := range filesMap {
-		if filesMap[path] == len(wordsMap) {
+	for path, _ := range f2p {
+		if f2p[path] == len(words) {
 			log.Printf("\t\twords found at: %v\n", path)
 			count++
 		}
@@ -115,4 +96,16 @@ func searchAll(words []string, data index.Data) {
 
 func searchPhrase(phrase string, data index.Data) {
 	log.Println("Search (phrase) starting:")
+}
+
+func removeDup(words []string) []string {
+	wordsUniq := make(map[string]int)
+	for _, w := range words {
+		wordsUniq[w]++
+	}
+	var res []string
+	for w, _ := range wordsUniq {
+		res = append(res, w)
+	}
+	return res
 }
