@@ -6,7 +6,10 @@ ftsearch is just test task for text file full text search/indexing
 
 [Go][] version 1.8 or higher is required. Install or update ftsearch using
 the 'go get' command:
-    
+
+    go get -u github.com/nick-lev/ftsearch/cmd/...
+
+    OR individually:
     go get -u github.com/nick-lev/ftsearch/cmd/Index
     go get -u github.com/nick-lev/ftsearch/cmd/Search
 
