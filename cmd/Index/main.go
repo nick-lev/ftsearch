@@ -19,6 +19,7 @@ func main() {
 	if len(os.Args) != 2 {
 		log.Fatal("Usage: Index path/2/file")
 	}
+
 	if ex, err := os.Executable(); err != nil {
 		log.Fatal(err)
 	} else {
@@ -29,24 +30,23 @@ func main() {
 	data := make(index.Data)
 
 	if err := index.Load(dataFile, data); err != nil {
-		if os.IsNotExist(err) {
-			log.Println(err)
-		} else {
+		if !os.IsNotExist(err) {
 			log.Fatal(err)
 		}
+		log.Print(err)
 	} else {
-		log.Println("Index loaded")
+		log.Print("Index loaded")
 	}
+
 	if err := parseFile(os.Args[1], data); err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println("File parsed")
 	}
+	log.Print("File parsed")
+
 	if err := index.Save(dataFile, data); err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println("Index saved")
 	}
+	log.Print("Index saved")
 }
 
 func parseFile(path string, data index.Data) error {

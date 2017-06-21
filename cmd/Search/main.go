@@ -24,13 +24,12 @@ func main() {
 	data := make(index.Data)
 
 	if err := index.Load(dataFile, data); err != nil {
-		if os.IsNotExist(err) {
-			log.Println(err)
-		} else {
+		if !os.IsNotExist(err) {
 			log.Fatal(err)
 		}
+		log.Print(err)
 	} else {
-		log.Println("Index loaded")
+		log.Print("Index loaded")
 	}
 
 	if len(os.Args) < 2 {
@@ -48,7 +47,7 @@ func main() {
 }
 
 func searchAny(words []string, data index.Data) {
-	log.Println("Search (any words) starting:")
+	log.Print("Search (any words) starting:")
 	type pc struct {
 		Path  string
 		Count int
@@ -58,9 +57,9 @@ func searchAny(words []string, data index.Data) {
 		var result []pc
 		log.Printf("\t%v. Searching for '%v'\n", i, word)
 		if _, ok := data[word]; !ok {
-			log.Println("\t\tcan not find this word")
+			log.Print("\t\tcan not find this word")
 		} else {
-			log.Println("\tFound in:")
+			log.Print("\tFound in:")
 			for path, count := range data[word] {
 				result = append(result, pc{Path: path, Count: count})
 			}
@@ -76,7 +75,7 @@ func searchAny(words []string, data index.Data) {
 }
 
 func searchAll(words []string, data index.Data) {
-	log.Println("Search (all words) starting:")
+	log.Print("Search (all words) starting:")
 	words = removeDup(words)
 	f2p := make(map[string]int)
 	for _, w := range words {
@@ -99,7 +98,7 @@ func searchAll(words []string, data index.Data) {
 }
 
 func searchPhrase(phrase string, data index.Data) {
-	log.Println("Search (phrase) starting:")
+	log.Print("Search (phrase) starting:")
 }
 
 func removeDup(words []string) []string {
