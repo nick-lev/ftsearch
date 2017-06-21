@@ -11,11 +11,7 @@ type Data map[string]map[string]int
 func Load(path string, data Data) error {
 	file, err := os.Open(path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		} else {
-			return err
-		}
+		return err
 	}
 	err = json.NewDecoder(file).Decode(&data)
 	if err != nil {

@@ -24,7 +24,11 @@ func main() {
 	data := make(index.Data)
 
 	if err := index.Load(dataFile, data); err != nil {
-		log.Fatal(err)
+		if os.IsNotExist(err) {
+			log.Println(err)
+		} else {
+			log.Fatal(err)
+		}
 	} else {
 		log.Println("Index loaded")
 	}
